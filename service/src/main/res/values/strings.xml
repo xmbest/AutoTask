@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_label">自动任务</string>
+    <string name="accessibility_service_description">自动任务 - 必要权限</string>
+</resources>

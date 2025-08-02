@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_label">AutoTask 自动化任务</string>
+    <string name="accessibility_service_description">AutoTask 自动化任务服务\n\n此服务用于执行自动化任务，包括：\n• 自动点击和滑动操作\n• 页面状态识别\n• 文本输入和搜索\n• 应用间跳转\n\n请放心使用，我们不会收集您的个人信息。</string>
+</resources>

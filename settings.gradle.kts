@@ -21,5 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "AutoTask"
 include(":app")
+include(":core")
 include(":common")
-include(":service")

@@ -18,6 +18,29 @@ class PageRecognizer(private val accessibilityService: AccessibilityService) {
     companion object {
         private const val TAG = "PageRecognizer"
     }
+    
+    // 页面变化监听相关
+    private var lastPageChangeTime = 0L
+    private var taskExecutor: Any? = null  // 避免循环依赖，使用Any类型
+    
+    /**
+     * 设置TaskExecutor引用，用于监听页面变化事件
+     */
+    fun setTaskExecutor(executor: Any) {
+        this.taskExecutor = executor
+    }
+    
+    /**
+     * 获取最后页面变化时间
+     */
+    private fun getLastPageChangeTime(): Long {
+        return try {
+            val method = taskExecutor?.javaClass?.getDeclaredMethod("getLastPageChangeTime")
+            method?.invoke(taskExecutor) as? Long ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+    }
 
     /**
      * 识别当前页面
@@ -56,14 +79,37 @@ class PageRecognizer(private val accessibilityService: AccessibilityService) {
         checkInterval: Long = 500
     ): Boolean {
         val startTime = System.currentTimeMillis()
+        var lastCheckTime = 0L
+        var lastEventCheckTime = getLastPageChangeTime()
 
+        Log.d(TAG, "开始等待页面: ${pageConfig.pageName}")
+        
         while (System.currentTimeMillis() - startTime < timeout) {
             val rootNode = accessibilityService.rootInActiveWindow
             if (rootNode != null && isPageMatched(rootNode, pageConfig)) {
                 Log.d(TAG, "成功等待到页面: ${pageConfig.pageName}")
                 return true
             }
-            delay(checkInterval)
+            
+            val currentTime = System.currentTimeMillis()
+            val currentEventTime = getLastPageChangeTime()
+            
+            // 如果检测到页面变化事件，立即进行检查
+            if (currentEventTime > lastEventCheckTime) {
+                lastEventCheckTime = currentEventTime
+                Log.d(TAG, "检测到页面变化事件，立即检查页面: ${pageConfig.pageName}")
+                // 立即进行下一次循环检查，不延迟
+                continue
+            }
+            
+            // 使用较短的延迟，但不要太频繁
+            delay(50)
+            
+            // 每隔checkInterval时间进行一次完整检查
+            if (currentTime - lastCheckTime >= checkInterval) {
+                lastCheckTime = currentTime
+                Log.d(TAG, "定期检查页面: ${pageConfig.pageName}")
+            }
         }
 
         Log.w(TAG, "等待页面超时: ${pageConfig.pageName}")
@@ -83,13 +129,37 @@ class PageRecognizer(private val accessibilityService: AccessibilityService) {
         checkInterval: Long = 500
     ): PageConfig? {
         val startTime = System.currentTimeMillis()
+        var lastCheckTime = 0L
+        var lastEventCheckTime = getLastPageChangeTime()
 
+        Log.d(TAG, "开始等待任意页面")
+        
         while (System.currentTimeMillis() - startTime < timeout) {
             val currentPage = recognizeCurrentPage(pageConfigs)
             if (currentPage != null) {
+                Log.d(TAG, "成功等待到页面: ${currentPage.pageName}")
                 return currentPage
             }
-            delay(checkInterval)
+            
+            val currentTime = System.currentTimeMillis()
+            val currentEventTime = getLastPageChangeTime()
+            
+            // 如果检测到页面变化事件，立即进行检查
+            if (currentEventTime > lastEventCheckTime) {
+                lastEventCheckTime = currentEventTime
+                Log.d(TAG, "检测到页面变化事件，立即检查任意页面")
+                // 立即进行下一次循环检查，不延迟
+                continue
+            }
+            
+            // 使用较短的延迟，但不要太频繁
+            delay(50)
+            
+            // 每隔checkInterval时间进行一次完整检查
+            if (currentTime - lastCheckTime >= checkInterval) {
+                lastCheckTime = currentTime
+                Log.d(TAG, "定期检查任意页面")
+            }
         }
 
         Log.w(TAG, "等待任意页面超时")

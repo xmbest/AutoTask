@@ -15,7 +15,7 @@ object TaskConfigFactory {
             maxVersion = "6.1.70"
         )
 
-        // 首页配置
+        // 首页
         val homePage = PageConfig(
             pageId = "home",
             pageName = "首页",
@@ -39,7 +39,7 @@ object TaskConfigFactory {
             )
         )
 
-        // 搜索页配置
+        // 搜索页
         val searchPage = PageConfig(
             pageId = "search",
             pageName = "搜索页",
@@ -68,8 +68,37 @@ object TaskConfigFactory {
             )
         )
 
+        // 播放详情页
+        val playInfo = PageConfig(
+            pageId = "playInfo",
+            pageName = "播放详情页",
+            pageType = PageType.INTERMEDIATE,
+            identifiers = listOf(
+                PageIdentifier(
+                    FindType.BY_ID,
+                    "com.tencent.qqmusiccar:id/inner_lyric_view",
+                    "歌词"
+                ),
+                PageIdentifier(
+                    FindType.BY_ID,
+                    "com.tencent.qqmusiccar:id/back",
+                    "放回"
+                )
+            ),
+            actions = listOf(
+                TaskAction(
+                    id = "back",
+                    actionType = ActionType.FIND_AND_CLICK,
+                    findType = FindType.BY_ID,
+                    target = "com.tencent.qqmusiccar:id/back",
+                    description = "退出详情页",
+                    timeout = 3000
+                )
+            )
+        )
 
-        // 选中候选
+
+        // 搜索页候选页
         val selectItem = PageConfig(
             pageId = "selectItem",
             pageName = "选中候选列表",
@@ -98,7 +127,7 @@ object TaskConfigFactory {
             )
         )
 
-
+        // 搜索结果页，播放第一首
         val result = PageConfig(
             pageId = "result",
             pageName = "结果页",
@@ -131,7 +160,7 @@ object TaskConfigFactory {
             taskId = "qq_music_search",
             taskName = "qq音乐搜歌",
             appInfo = appInfo,
-            pages = listOf(homePage, searchPage, selectItem, result),
+            pages = listOf(homePage, searchPage, selectItem,playInfo, result),
             transitions = emptyList(),
             startPageId = "home",
             description = "自动搜索并播放qq音乐中的歌曲",

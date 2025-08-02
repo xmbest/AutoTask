@@ -55,9 +55,16 @@ class TaskExecutor(private val accessibilityService: AccessibilityService) {
     private val actionExecutor = ActionExecutor(accessibilityService)
     private val pageRecognizer = PageRecognizer(accessibilityService)
     
+    init {
+        // 设置PageRecognizer的TaskExecutor引用，用于监听页面变化事件
+        pageRecognizer.setTaskExecutor(this)
+    }
+    
     private var currentJob: Job? = null
     private var isUserInterrupted = false
     private var lastUserActionTime = 0L
+    private var lastPageChangeTime = 0L
+    private var isWaitingForPage = false
     
     // 任务状态流
     private val _taskResult = MutableStateFlow(TaskResult(TaskStatus.PENDING))
@@ -174,6 +181,25 @@ class TaskExecutor(private val accessibilityService: AccessibilityService) {
             isUserInterrupted = true
             Log.i(TAG, "检测到用户操作，任务将被中断")
         }
+    }
+    
+    /**
+     * 通知页面发生变化
+     * 当无障碍服务检测到页面变化事件时调用
+     */
+    fun notifyPageChanged() {
+        lastPageChangeTime = System.currentTimeMillis()
+        if (isWaitingForPage) {
+            Log.d(TAG, "检测到页面变化事件，触发页面检测")
+        }
+    }
+    
+    /**
+     * 获取最后页面变化时间
+     * 供PageRecognizer使用
+     */
+    fun getLastPageChangeTime(): Long {
+        return lastPageChangeTime
     }
     
     /**
@@ -316,7 +342,14 @@ class TaskExecutor(private val accessibilityService: AccessibilityService) {
             visitedPages.add(currentPageId)
             
             // 等待页面出现
-            if (!pageRecognizer.waitForPage(pageConfig, pageConfig.pageTimeout)) {
+            isWaitingForPage = true
+            val pageWaitResult = try {
+                pageRecognizer.waitForPage(pageConfig, pageConfig.pageTimeout)
+            } finally {
+                isWaitingForPage = false
+            }
+            
+            if (!pageWaitResult) {
                 return TaskResult(
                     status = TaskStatus.FAILED,
                     message = "等待页面超时: ${pageConfig.pageName}",

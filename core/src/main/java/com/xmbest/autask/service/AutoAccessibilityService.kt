@@ -61,6 +61,13 @@ class AutoAccessibilityService : AccessibilityService() {
                 it.eventType == AccessibilityEvent.TYPE_GESTURE_DETECTION_START) {
                 taskExecutor.notifyUserAction()
             }
+            
+            // 监听页面变化事件，用于实时页面检测
+            if (it.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+                it.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ||
+                it.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+                taskExecutor.notifyPageChanged()
+            }
         }
     }
 

@@ -47,10 +47,10 @@ data class TaskAction(
     val y: Int? = null,               // Y坐标
     val endX: Int? = null,            // 滑动结束X坐标
     val endY: Int? = null,            // 滑动结束Y坐标
-    val duration: Long = 500,         // 操作持续时间（毫秒）
-    val timeout: Long = 5000,         // 操作超时时间（毫秒）
+    val duration: Long = 100,         // 操作持续时间（毫秒）
+    val timeout: Long = 1500,         // 操作超时时间（毫秒）
     val retryCount: Int = 3,          // 重试次数
     val description: String = "",     // 操作描述
     val isOptional: Boolean = false,  // 是否为可选操作（失败不影响整体流程）
-    val waitAfter: Long = 1000        // 操作后等待时间（毫秒）
+    val waitAfter: Long = 200        // 操作后等待时间（毫秒）
 )

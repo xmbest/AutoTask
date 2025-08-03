@@ -100,7 +100,7 @@ val customTask = TaskConfig(
         )
         // ... 更多页面配置
     ),
-    startPageId = "home"
+
 )
 
 AutoTaskApi.addTask(customTask)

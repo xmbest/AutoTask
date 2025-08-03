@@ -217,10 +217,7 @@ class TaskManager(private val context: Context) {
             errors.add("页面配置不能为空")
         }
         
-        // 检查起始页面
-        if (taskConfig.getPageConfig(taskConfig.startPageId) == null) {
-            errors.add("起始页面配置不存在: ${taskConfig.startPageId}")
-        }
+
         
         // 检查页面跳转的完整性通过transitions配置
         taskConfig.transitions.forEach { transition ->

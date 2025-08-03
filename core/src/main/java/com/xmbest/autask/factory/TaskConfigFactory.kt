@@ -162,7 +162,6 @@ object TaskConfigFactory {
             appInfo = appInfo,
             pages = listOf(homePage, searchPage, selectItem, playInfo, result),
             transitions = emptyList(),
-            startPageId = "home",
             description = "自动搜索并播放qq音乐中的歌曲",
             author = "AutoTask"
         )
@@ -281,7 +280,6 @@ object TaskConfigFactory {
             appInfo = appInfo,
             pages = listOf(home, searchPage, searchResult, result),
             transitions = emptyList(),
-            startPageId = "home",
             description = "自动搜索选中",
             author = "AutoTask"
         )

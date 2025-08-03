@@ -91,7 +91,7 @@ class TaskExecutor(private val accessibilityService: AccessibilityService) {
         }
 
         currentTaskConfig = taskConfig
-        currentPageId = taskConfig.startPageId
+        currentPageId = ""
         executedActionsCount = 0
         totalActionsCount = calculateTotalActions(taskConfig)
         isUserInterrupted = false

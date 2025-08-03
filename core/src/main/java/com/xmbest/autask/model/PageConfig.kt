@@ -33,7 +33,6 @@ data class PageConfig(
     val pageType: PageType = PageType.INTERMEDIATE, // 页面类型
     val identifiers: List<PageIdentifier>,        // 页面识别条件（多个条件AND关系）
     val actions: List<TaskAction>,                // 该页面需要执行的操作列表
-    val isTargetPage: Boolean = false,            // 是否为最终目标页面
     val maxRetryCount: Int = 3,                   // 页面最大重试次数
     val pageTimeout: Long = 10000,                // 页面超时时间（毫秒）
     val customProperties: Map<String, String> = emptyMap(), // 自定义属性，供集成应用使用
@@ -42,7 +41,7 @@ data class PageConfig(
     /**
      * 检查是否为目标页面
      */
-    fun isTargetPageType(): Boolean = pageType == PageType.TARGET || isTargetPage
+    fun isTargetPageType(): Boolean = pageType == PageType.TARGET
     
     /**
      * 获取自定义属性值

@@ -41,7 +41,6 @@ data class TaskConfig(
     val appInfo: AppInfo,                         // 目标应用信息
     val pages: List<PageConfig>,                  // 页面配置列表
     val transitions: List<PageTransition>,        // 页面跳转配置
-    val startPageId: String,                      // 起始页面ID
     val globalTimeout: Long = 60000,              // 全局超时时间（毫秒）
     val enableUserInterrupt: Boolean = true,     // 是否允许用户中断
     val interruptDetectInterval: Long = 500,      // 中断检测间隔（毫秒）
@@ -85,12 +84,7 @@ data class TaskConfig(
         return pages.filter { it.isTargetPageType() }
     }
     
-    /**
-     * 获取起始页面
-     */
-    fun getStartPage(): PageConfig? {
-        return getPageConfig(startPageId)
-    }
+
     
     /**
      * 根据页面类型获取页面列表
@@ -103,9 +97,6 @@ data class TaskConfig(
      * 验证任务配置的完整性
      */
     fun validate(): Boolean {
-        // 检查起始页面是否存在
-        if (getPageConfig(startPageId) == null) return false
-        
         // 检查是否至少有一个目标页面
         if (getTargetPages().isEmpty()) return false
         

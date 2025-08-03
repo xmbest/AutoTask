@@ -24,6 +24,9 @@ object AutoTaskApi {
     private val _isAccessibilityEnabled = MutableStateFlow(false)
     val isAccessibilityEnabled: StateFlow<Boolean> = _isAccessibilityEnabled.asStateFlow()
 
+    /**
+     * 更新当前无障碍服务是否开启
+     */
     fun updateIsAccessibilityEnabled(enabled: Boolean) {
         _isAccessibilityEnabled.update { enabled }
     }

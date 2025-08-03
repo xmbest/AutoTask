@@ -160,10 +160,129 @@ object TaskConfigFactory {
             taskId = "qq_music_search",
             taskName = "qq音乐搜歌",
             appInfo = appInfo,
-            pages = listOf(homePage, searchPage, selectItem,playInfo, result),
+            pages = listOf(homePage, searchPage, selectItem, playInfo, result),
             transitions = emptyList(),
             startPageId = "home",
             description = "自动搜索并播放qq音乐中的歌曲",
+            author = "AutoTask"
+        )
+    }
+
+    fun createSettingsSearchTask(): TaskConfig {
+        val appInfo = AppInfo("com.android.settings", "", "")
+
+        val home = PageConfig(
+            pageId = "home",
+            pageName = "首页",
+            pageType = PageType.INTERMEDIATE,
+            identifiers = listOf(
+                PageIdentifier(
+                    FindType.BY_TEXT,
+                    value = "我的设备",
+                    description = "设置页"
+                )
+            ),
+            actions = listOf(
+                TaskAction(
+                    id = "click_search",
+                    actionType = ActionType.FIND_AND_CLICK,
+                    findType = FindType.BY_ID,
+                    target = "com.android.settings:id/search_mode_stub",
+                    description = "点击搜索栏",
+                    timeout = 5000
+                )
+            )
+        )
+
+        val searchPage = PageConfig(
+            pageId = "searchPage",
+            pageName = "搜索页",
+            pageType = PageType.INTERMEDIATE,
+            identifiers = listOf(
+                PageIdentifier(
+                    FindType.BY_ID,
+                    value = "com.android.settings:id/search_panel",
+                    description = "搜索框"
+                ),
+                PageIdentifier(
+                    FindType.BY_ID,
+                    value = "com.android.settings:id/search_history_tv",
+                    description = "搜索记录标题"
+                )
+            ),
+            actions = listOf(
+                TaskAction(
+                    id = "input_text_bluetooth",
+                    actionType = ActionType.INPUT_TEXT,
+                    findType = FindType.BY_CLASS,
+                    target = "android.widget.EditText",
+                    description = "输入蓝牙",
+                    inputText = "蓝牙",
+                    timeout = 3000
+                )
+            )
+        )
+
+        val searchResult = PageConfig(
+            pageId = "searchResult",
+            pageName = "搜索页候选结果页",
+            pageType = PageType.INTERMEDIATE,
+            identifiers = listOf(
+                PageIdentifier(
+                    FindType.BY_ID,
+                    value = "com.android.settings:id/search_result",
+                    description = "搜索结果"
+                )
+            ),
+            actions = listOf(
+                TaskAction(
+                    id = "click_result",
+                    actionType = ActionType.FIND_AND_CLICK,
+                    findType = FindType.BY_ID,
+                    target = "com.android.settings:id/settings_search_item_name",
+                    description = "选中第一个",
+                    timeout = 3000
+                )
+            )
+        )
+
+        val result = PageConfig(
+            pageId = "result",
+            pageName = "蓝牙页面",
+            pageType = PageType.TARGET,
+            identifiers = listOf(
+                PageIdentifier(
+                    FindType.BY_TEXT,
+                    value = "设备名称",
+                    description = "设备名称"
+                ),
+                PageIdentifier(
+                    FindType.BY_TEXT,
+                    value = "蓝牙",
+                    description = "蓝牙标题"
+                )
+            ),
+            actions = listOf(
+                TaskAction(
+                    id = "click_switch",
+                    actionType = ActionType.FIND_AND_CLICK,
+                    findType = FindType.BY_CLASS,
+                    target = "android.widget.Switch",
+                    description = "点击开关",
+                    timeout = 3000
+                )
+            )
+        )
+
+
+        return TaskConfig(
+            taskId = "settings_search_switch_bluetooth",
+            taskName = "通过搜索开关蓝牙",
+            appInfo = appInfo,
+            pages = listOf(home, searchPage, searchResult, result),
+            transitions = emptyList(),
+            startPageId = "home",
+            description = "自动搜索选中",
             author = "AutoTask"
         )
     }
@@ -173,7 +292,8 @@ object TaskConfigFactory {
      */
     fun getAllPresetTasks(): List<TaskConfig> {
         return listOf(
-            createQQMusicSearchTask()
+            createQQMusicSearchTask(),
+            createSettingsSearchTask()
         )
     }
 }

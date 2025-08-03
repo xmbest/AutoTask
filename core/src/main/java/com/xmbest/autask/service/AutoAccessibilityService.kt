@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityEvent
 import com.xmbest.autask.api.AutoTaskApi
 import com.xmbest.autask.executor.TaskExecutor
 import com.xmbest.autask.manager.TaskManager
+import com.xmbest.autask.model.TaskStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +41,15 @@ class AutoAccessibilityService : AccessibilityService() {
         serviceScope.launch {
             taskExecutor.taskResult.collect { result ->
                 Log.d(TAG, "任务状态更新: ${result.status} - ${result.message}")
+
+                // 当任务失败、取消或完成时，切换回监听本应用
+                if (result.status == TaskStatus.FAILED ||
+                    result.status == TaskStatus.CANCELLED ||
+                    result.status == TaskStatus.COMPLETED
+                ) {
+                    updatePackageNamesForTask(packageName)
+                    Log.i(TAG, "任务结束(${result.status})，切换回监听本应用: $packageName")
+                }
             }
         }
     }
@@ -85,12 +95,13 @@ class AutoAccessibilityService : AccessibilityService() {
                     AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
                     AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or
                     AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
-            packageNames = null // 监听所有应用
+            // 默认只监听本应用，避免性能问题
+            packageNames = arrayOf(packageName)
             notificationTimeout = 100
         }
         setServiceInfo(serviceInfo)
 
-        Log.i(TAG, "无障碍服务已连接")
+        Log.i(TAG, "无障碍服务已连接，默认监听本应用: $packageName")
 
         AutoTaskApi.updateIsAccessibilityEnabled(true)
     }
@@ -119,7 +130,10 @@ class AutoAccessibilityService : AccessibilityService() {
             return false
         }
 
-        Log.i(TAG, "启动任务: ${taskConfig.taskName}")
+        // 切换监听到任务的目标应用
+        updatePackageNamesForTask(taskConfig.appInfo.packageName)
+
+        Log.i(TAG, "启动任务: ${taskConfig.taskName}，切换监听到: ${taskConfig.appInfo.packageName}")
         taskExecutor.executeTask(taskConfig)
         return true
     }
@@ -184,7 +198,7 @@ class AutoAccessibilityService : AccessibilityService() {
         if (currentPackages.remove(packageName)) {
             val newServiceInfo = serviceInfo?.apply {
                 this.packageNames = if (currentPackages.isEmpty()) {
-                    null // 监听所有应用
+                    arrayOf(this@AutoAccessibilityService.packageName) // 默认监听本应用
                 } else {
                     currentPackages.toTypedArray()
                 }
@@ -194,6 +208,27 @@ class AutoAccessibilityService : AccessibilityService() {
                 setServiceInfo(newServiceInfo)
                 Log.d(TAG, "移除监听包名: $packageName")
             }
+        }
+    }
+
+    /**
+     * 为任务更新监听的包名
+     * @param targetPackageName 目标应用包名，如果为空则监听本应用
+     */
+    private fun updatePackageNamesForTask(targetPackageName: String?) {
+        val packageToListen = if (targetPackageName.isNullOrEmpty()) {
+            packageName // 监听本应用
+        } else {
+            targetPackageName
+        }
+
+        val newServiceInfo = serviceInfo?.apply {
+            this.packageNames = arrayOf(packageToListen)
+        }
+
+        if (newServiceInfo != null) {
+            setServiceInfo(newServiceInfo)
+            Log.d(TAG, "更新监听包名为: $packageToListen")
         }
     }
 }

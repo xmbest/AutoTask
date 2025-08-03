@@ -4,15 +4,34 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,9 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.xmbest.autask.model.TaskConfig
 import com.xmbest.autotask.ui.theme.AutoTaskTheme
 import com.xmbest.autotask.viewmodel.MainViewModel
-import com.xmbest.autask.model.TaskConfig
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,18 +63,11 @@ fun MainScreen(
     val context = LocalContext.current
     val tasks by viewModel.tasks.collectAsStateWithLifecycle()
     val isAccessibilityEnabled by viewModel.isAccessibilityEnabled.collectAsStateWithLifecycle()
-    
+
     LaunchedEffect(Unit) {
         viewModel.loadTasks()
-        viewModel.startAccessibilityMonitoring(context)
     }
-    
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.stopAccessibilityMonitoring()
-        }
-    }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -86,18 +98,18 @@ fun MainScreen(
                 isEnabled = isAccessibilityEnabled,
                 onRequestPermission = { viewModel.openAccessibilitySettings(context) }
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // 任务列表
             Text(
                 text = "任务列表",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             if (tasks.isEmpty()) {
                 EmptyTasksView(onLoadPresets = { viewModel.loadPresetTasks() })
             } else {
@@ -124,9 +136,9 @@ fun PermissionStatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isEnabled) 
-                MaterialTheme.colorScheme.primaryContainer 
-            else 
+            containerColor = if (isEnabled)
+                MaterialTheme.colorScheme.primaryContainer
+            else
                 MaterialTheme.colorScheme.errorContainer
         )
     ) {
@@ -138,7 +150,7 @@ fun PermissionStatusCard(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             if (!isEnabled) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -202,10 +214,10 @@ fun TaskItem(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                         text = task.appInfo.packageName,
-                         style = MaterialTheme.typography.bodySmall,
-                         color = MaterialTheme.colorScheme.onSurfaceVariant
-                     )
+                        text = task.appInfo.packageName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     if (task.description.isNotEmpty()) {
                         Text(
                             text = task.description,
@@ -213,7 +225,7 @@ fun TaskItem(
                         )
                     }
                 }
-                
+
                 IconButton(
                     onClick = { onStartTask(task.taskId) }
                 ) {

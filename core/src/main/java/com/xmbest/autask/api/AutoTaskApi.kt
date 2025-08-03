@@ -1,59 +1,33 @@
 package com.xmbest.autask.api
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.xmbest.autask.factory.TaskConfigFactory
 import com.xmbest.autask.model.TaskConfig
 import com.xmbest.autask.model.TaskResult
 import com.xmbest.autask.service.AutoAccessibilityService
 import com.xmbest.autotask.utils.AccessibilityPermissionUtils
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.update
 
 /**
  * AutoTask API接口
  * 提供给外部模块使用的核心功能接口
  */
+@SuppressLint("StaticFieldLeak")
 object AutoTaskApi {
-    
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     private val _isAccessibilityEnabled = MutableStateFlow(false)
     val isAccessibilityEnabled: StateFlow<Boolean> = _isAccessibilityEnabled.asStateFlow()
-    
-    private var isMonitoring = false
-    
-    /**
-     * 开始监听无障碍服务状态
-     */
-    fun startAccessibilityMonitoring(context: Context) {
-        if (isMonitoring) return
-        isMonitoring = true
-        
-        scope.launch {
-            while (isMonitoring) {
-                val isEnabled = AccessibilityPermissionUtils.isAccessibilityServiceEnabled(
-                    context,
-                    AutoAccessibilityService::class.java
-                )
-                _isAccessibilityEnabled.value = isEnabled
-                delay(1000) // 每秒检查一次
-            }
-        }
+
+    fun updateIsAccessibilityEnabled(enabled: Boolean) {
+        _isAccessibilityEnabled.update { enabled }
     }
-    
-    /**
-     * 停止监听无障碍服务状态
-     */
-    fun stopAccessibilityMonitoring() {
-        isMonitoring = false
-    }
-    
+
     /**
      * 检查无障碍服务是否已启用
      */
@@ -63,14 +37,14 @@ object AutoTaskApi {
             AutoAccessibilityService::class.java
         )
     }
-    
+
     /**
      * 请求开启无障碍服务
      */
     fun requestAccessibilityPermission(context: Context) {
         AccessibilityPermissionUtils.openAccessibilitySettings(context)
     }
-    
+
     /**
      * 检查并请求无障碍权限
      */
@@ -84,7 +58,7 @@ object AutoTaskApi {
             callback
         )
     }
-    
+
     /**
      * 启动任务
      */
@@ -102,7 +76,7 @@ object AutoTaskApi {
             true
         }
     }
-    
+
     /**
      * 启动任务（重载方法，只需要taskId）
      */
@@ -116,7 +90,7 @@ object AutoTaskApi {
             }
         } ?: false
     }
-    
+
     /**
      * 停止指定任务
      */
@@ -131,7 +105,7 @@ object AutoTaskApi {
             }
         } ?: false
     }
-    
+
     /**
      * 暂停指定任务
      */
@@ -146,7 +120,7 @@ object AutoTaskApi {
             }
         } ?: false
     }
-    
+
     /**
      * 恢复指定任务
      */
@@ -161,7 +135,7 @@ object AutoTaskApi {
             }
         } ?: false
     }
-    
+
     /**
      * 获取所有任务
      */
@@ -171,7 +145,7 @@ object AutoTaskApi {
             it.getTaskManager().getAllTaskConfigs()
         } ?: emptyList()
     }
-    
+
     /**
      * 添加任务
      */
@@ -181,7 +155,7 @@ object AutoTaskApi {
             it.getTaskManager().addTaskConfig(taskConfig)
         } ?: false
     }
-    
+
     /**
      * 移除任务
      */
@@ -191,7 +165,7 @@ object AutoTaskApi {
             it.getTaskManager().removeTaskConfig(taskId)
         } ?: false
     }
-    
+
     /**
      * 停止当前任务
      */
@@ -204,7 +178,7 @@ object AutoTaskApi {
             false
         }
     }
-    
+
     /**
      * 暂停当前任务
      */
@@ -217,7 +191,7 @@ object AutoTaskApi {
             false
         }
     }
-    
+
     /**
      * 恢复当前任务
      */
@@ -230,7 +204,7 @@ object AutoTaskApi {
             false
         }
     }
-    
+
     /**
      * 获取任务执行状态
      */
@@ -238,7 +212,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskExecutor()?.taskResult
     }
-    
+
     /**
      * 添加任务配置
      */
@@ -251,7 +225,7 @@ object AutoTaskApi {
             false
         }
     }
-    
+
     /**
      * 获取任务配置
      */
@@ -259,7 +233,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.getTaskConfig(taskId)
     }
-    
+
     /**
      * 获取所有任务配置
      */
@@ -267,7 +241,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.getAllTaskConfigs() ?: emptyList()
     }
-    
+
     /**
      * 删除任务配置
      */
@@ -275,7 +249,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.removeTaskConfig(taskId) ?: false
     }
-    
+
     /**
      * 根据应用包名获取任务配置
      */
@@ -283,7 +257,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.getTaskConfigsByPackage(packageName) ?: emptyList()
     }
-    
+
     /**
      * 搜索任务配置
      */
@@ -291,7 +265,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.searchTaskConfigs(keyword) ?: emptyList()
     }
-    
+
     /**
      * 导入任务配置
      */
@@ -299,7 +273,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.importTaskConfig(configJson) ?: false
     }
-    
+
     /**
      * 导出任务配置
      */
@@ -307,7 +281,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.exportTaskConfig(taskId)
     }
-    
+
     /**
      * 导出所有任务配置
      */
@@ -315,7 +289,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.exportAllTaskConfigs()
     }
-    
+
     /**
      * 批量导入任务配置
      */
@@ -323,7 +297,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.importTaskConfigs(configsJson) ?: 0
     }
-    
+
     /**
      * 验证任务配置
      */
@@ -331,7 +305,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.validateTaskConfig(taskConfig) ?: emptyList()
     }
-    
+
     /**
      * 获取任务统计信息
      */
@@ -339,14 +313,14 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskManager()?.getTaskStatistics() ?: emptyMap()
     }
-    
+
     /**
      * 获取预设任务配置
      */
     fun getPresetTasks(): List<TaskConfig> {
         return TaskConfigFactory.getAllPresetTasks()
     }
-    
+
     /**
      * 添加监听的应用包名
      */
@@ -354,7 +328,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         service?.addPackageName(packageName)
     }
-    
+
     /**
      * 移除监听的应用包名
      */
@@ -362,7 +336,7 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         service?.removePackageName(packageName)
     }
-    
+
     /**
      * 获取当前页面调试信息
      */
@@ -370,11 +344,20 @@ object AutoTaskApi {
         val service = AutoAccessibilityService.getInstance()
         return service?.getTaskExecutor()?.getCurrentPageDebugInfo()
     }
-    
+
     /**
      * 检查服务是否可用
      */
     fun isServiceAvailable(): Boolean {
         return AutoAccessibilityService.getInstance() != null
+    }
+
+    /**
+     * 内部方法：由AutoAccessibilityService调用来通知状态变化
+     * 当服务连接或断开时直接更新状态，比ContentObserver更准确
+     */
+    internal fun notifyAccessibilityServiceStateChanged(isConnected: Boolean) {
+        _isAccessibilityEnabled.value = isConnected
+        Log.d("AutoTaskApi", "无障碍服务状态变化: $isConnected")
     }
 }

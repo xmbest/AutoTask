@@ -11,19 +11,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
-    
+
     private val _tasks = MutableStateFlow<List<TaskConfig>>(emptyList())
     val tasks: StateFlow<List<TaskConfig>> = _tasks.asStateFlow()
-    
+
     // 使用AutoTaskApi的权限状态Flow
     val isAccessibilityEnabled: StateFlow<Boolean> = AutoTaskApi.isAccessibilityEnabled
-    
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-    
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
-    
+
     /**
      * 加载任务列表
      */
@@ -40,7 +40,7 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
+
     /**
      * 加载预设任务
      */
@@ -49,12 +49,12 @@ class MainViewModel : ViewModel() {
             try {
                 _isLoading.value = true
                 val presetTasks = AutoTaskApi.getPresetTasks()
-                
+
                 // 添加预设任务到任务管理器
                 presetTasks.forEach { task ->
                     AutoTaskApi.addTask(task)
                 }
-                
+
                 // 重新加载任务列表
                 loadTasks()
             } catch (e: Exception) {
@@ -64,28 +64,14 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
-    /**
-     * 启动无障碍权限监听
-     */
-    fun startAccessibilityMonitoring(context: Context) {
-        AutoTaskApi.startAccessibilityMonitoring(context)
-    }
-    
-    /**
-     * 停止无障碍权限监听
-     */
-    fun stopAccessibilityMonitoring() {
-        AutoTaskApi.stopAccessibilityMonitoring()
-    }
-    
+
     /**
      * 打开无障碍设置
      */
     fun openAccessibilitySettings(context: Context) {
         AutoTaskApi.requestAccessibilityPermission(context)
     }
-    
+
     /**
      * 开始执行任务
      */
@@ -103,7 +89,7 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
+
     /**
      * 停止任务
      */
@@ -121,7 +107,7 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
+
     /**
      * 暂停任务
      */
@@ -139,7 +125,7 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
+
     /**
      * 恢复任务
      */
@@ -157,7 +143,7 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
+
     /**
      * 删除任务
      */
@@ -176,7 +162,7 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    
+
     /**
      * 清除错误消息
      */
